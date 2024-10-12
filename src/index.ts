@@ -37,6 +37,11 @@
 
 // Mapping of hostnames and their corresponding paths
 const HOST_PATH_MAP = {
+	"static-page-handler.sjaconsulting.workers.dev": {
+		"/security/acknowledgements": "security-acknowledgement.html",
+		"/security/policy": "security-policy.html",
+		"/security/hiring": "security-hiring.html",
+	  },
 	"crafty.social": {
 	  "/security/acknowledgements": "security-acknowledgement.html",
 	  "/security/policy": "security-policy.html",
