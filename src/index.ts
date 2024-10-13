@@ -35,107 +35,110 @@
  * Date: Oct-11-2024
  */
 
+export interface Env {
+  STATIC_PAGE_HANDLER_AUTH_KEY_SECRET: string;
+}
+
 // Mapping of hostnames and their corresponding paths
 const HOST_PATH_MAP = {
-	"static-page-handler.sjaconsulting.workers.dev": {
-		"/security/acknowledgements": "security-acknowledgement.html",
-		"/security/policy": "security-policy.html",
-		"/security/hiring": "security-hiring.html",
-	  },
-	"crafty.social": {
-	  "/security/acknowledgements": "security-acknowledgement.html",
-	  "/security/policy": "security-policy.html",
-	  "/security/hiring": "security-hiring.html",
-	},
-	"example2.com": {
-	  "/security.txt": "example2/security.txt",
-	  "/disclaimer-policy.txt": "example2/disclaimer-policy.txt",
-	},
-	// Add more host-path mappings as needed
-  };
-  
-  // Allow list for file access based on path
-  const ALLOW_LIST = [
-	"/security/acknowledgements",
-	"/security/policy",
-	"/security/hiring",
-	// Add more paths as needed
-  ];
-  
-  // Access the STATIC_PAGE_HANDLER_AUTH_KEY_SECRET from the environment
-  const authKeySecret = env.STATIC_PAGE_HANDLER_AUTH_KEY_SECRET;
-  
-  // Check requests for a pre-shared secret
-  const hasValidHeader = (request) => {
-	  return request.headers.get("X-Custom-Auth-Key") === authKeySecret;
-  };
-  
-  function authorizeRequest(request, env, key) {
-	switch (request.method) {
-	  case "PUT":
-	  case "DELETE":
-		return hasValidHeader(request, env);
-	  case "GET":
-		return ALLOW_LIST.includes(key);
-	  default:
-		return false;
-	}
+  "static-page-handler.sjaconsulting.workers.dev": {
+    "/security/acknowledgements": "security-acknowledgement.html",
+    "/security/policy": "security-policy.html",
+    "/security/hiring": "security-hiring.html",
+  },
+  "crafty.social": {
+    "/security/acknowledgements": "security-acknowledgement.html",
+    "/security/policy": "security-policy.html",
+    "/security/hiring": "security-hiring.html",
+  },
+  "example2.com": {
+    "/security.txt": "example2/security.txt",
+    "/disclaimer-policy.txt": "example2/disclaimer-policy.txt",
+  },
+  // Add more host-path mappings as needed
+};
+
+// Allow list for file access based on path
+const ALLOW_LIST = [
+  "/security/acknowledgements",
+  "/security/policy",
+  "/security/hiring",
+  // Add more paths as needed
+];
+
+// Access the STATIC_PAGE_HANDLER_AUTH_KEY_SECRET from the environment
+const authKeySecret = env.STATIC_PAGE_HANDLER_AUTH_KEY_SECRET;
+
+// Check requests for a pre-shared secret
+const hasValidHeader = (request) => {
+  return request.headers.get("X-Custom-Auth-Key") === authKeySecret;
+};
+
+function authorizeRequest(request, env, key) {
+  switch (request.method) {
+    case "PUT":
+    case "DELETE":
+      return hasValidHeader(request, env);
+    case "GET":
+      return ALLOW_LIST.includes(key);
+    default:
+      return false;
   }
-  
-  export default {
-	async fetch(request, env, ctx) {
-	  const url = new URL(request.url);
-	  const host = url.hostname; // Get the hostname from the request
-	  const key = url.pathname;   // Get the pathname from the request
-  
-	  // Check if the host is mapped
-	  if (!HOST_PATH_MAP[host] || !HOST_PATH_MAP[host][key]) {
-		return new Response("Not Found", { status: 404 });
-	  }
-  
-	  // Authorize the request based on the key
-	  if (!authorizeRequest(request, env, key)) {
-		return new Response("Forbidden", { status: 403 });
-	  }
-  
-	  // Determine the file path in R2 based on hostname and request path
-	  const filePath = HOST_PATH_MAP[host][key];
-  
-	  switch (request.method) {
-		case "PUT":
-		  // Store the file in R2
-		  await env.MY_BUCKET.put(filePath, request.body);
-		  return new Response(`Put ${filePath} successfully!`, { status: 201 });
-  
-		case "GET":
-		  // Fetch the object from R2
-		  const object = await env.MY_BUCKET.get(filePath);
-  
-		  if (object === null) {
-			return new Response("Object Not Found", { status: 404 });
-		  }
-  
-		  const headers = new Headers();
-		  object.writeHttpMetadata(headers); // Set appropriate HTTP headers
-		  headers.set("etag", object.httpEtag); // Set the ETag for cache validation
-  
-		  return new Response(object.body, {
-			headers,
-		  });
-  
-		case "DELETE":
-		  // Delete the file from R2
-		  await env.MY_BUCKET.delete(filePath);
-		  return new Response("Deleted!", { status: 204 });
-  
-		default:
-		  return new Response("Method Not Allowed", {
-			status: 405,
-			headers: {
-			  Allow: "PUT, GET, DELETE",
-			},
-		  });
-	  }
-	},
-  };
-  
+}
+
+export default {
+  async fetch(request, env, ctx): Promise<Response> {
+    const url = new URL(request.url);
+    const host = url.hostname; // Get the hostname from the request
+    const key = url.pathname;   // Get the pathname from the request
+
+    // Check if the host is mapped
+    if (!HOST_PATH_MAP[host] || !HOST_PATH_MAP[host][key]) {
+      return new Response("Not Found", { status: 404 });
+    }
+
+    // Authorize the request based on the key
+    if (!authorizeRequest(request, env, key)) {
+      return new Response("Forbidden", { status: 403 });
+    }
+
+    // Determine the file path in R2 based on hostname and request path
+    const filePath = HOST_PATH_MAP[host][key];
+
+    switch (request.method) {
+      case "PUT":
+        // Store the file in R2
+        await env.MY_BUCKET.put(filePath, request.body);
+        return new Response(`Put ${filePath} successfully!`, { status: 201 });
+
+      case "GET":
+        // Fetch the object from R2
+        const object = await env.MY_BUCKET.get(filePath);
+
+        if (object === null) {
+          return new Response("Object Not Found", { status: 404 });
+        }
+
+        const headers = new Headers();
+        object.writeHttpMetadata(headers); // Set appropriate HTTP headers
+        headers.set("etag", object.httpEtag); // Set the ETag for cache validation
+
+        return new Response(object.body, {
+          headers,
+        });
+
+      case "DELETE":
+        // Delete the file from R2
+        await env.MY_BUCKET.delete(filePath);
+        return new Response("Deleted!", { status: 204 });
+
+      default:
+        return new Response("Method Not Allowed", {
+          status: 405,
+          headers: {
+            Allow: "PUT, GET, DELETE",
+          },
+        });
+    }
+  }
+} satisfies ExportedHandler<Env>;
