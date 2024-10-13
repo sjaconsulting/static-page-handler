@@ -112,3 +112,9 @@ bucket_name = "static-pages"
 # [[vectorize]]
 # binding = "MY_INDEX"
 # index_name = "my-index"
+
+routes = [
+  { pattern = "crafty.social/*", zone_name = "crafty.social" }
+  # or
+  # { pattern = "subdomain.example.com/*", zone_id = "<YOUR_ZONE_ID>" }
+]

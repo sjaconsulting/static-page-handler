@@ -51,9 +51,9 @@ const HOST_PATH_MAP = {
     "/security/policy": "security-policy.html",
     "/security/hiring": "security-hiring.html",
   },
-  "example2.com": {
-    "/security.txt": "example2/security.txt",
-    "/disclaimer-policy.txt": "example2/disclaimer-policy.txt",
+  "localhost": {
+    "/security/acknowledgements": "security-acknowledgement.html",
+    "/security/policy": "security-policy.html",
   },
   // Add more host-path mappings as needed
 };
