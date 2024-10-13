@@ -66,11 +66,11 @@ const ALLOW_LIST = [
   // Add more paths as needed
 ];
 
-// Access the STATIC_PAGE_HANDLER_AUTH_KEY_SECRET from the environment
-const authKeySecret = env.STATIC_PAGE_HANDLER_AUTH_KEY_SECRET;
 
 // Check requests for a pre-shared secret
 const hasValidHeader = (request) => {
+  // Access the STATIC_PAGE_HANDLER_AUTH_KEY_SECRET from the environment
+  const authKeySecret = env.STATIC_PAGE_HANDLER_AUTH_KEY_SECRET;
   return request.headers.get("X-Custom-Auth-Key") === authKeySecret;
 };
 
