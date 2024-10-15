@@ -4,6 +4,10 @@ main = "src/index.ts"
 compatibility_date = "2024-10-11"
 compatibility_flags = ["nodejs_compat"]
 
+routes = [
+  { pattern = "crafty.social/*", zone_name = "crafty.social" }
+]
+
 # Workers Logs
 # Docs: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
 # Configuration: https://developers.cloudflare.com/workers/observability/logs/workers-logs/#enable-workers-logs
@@ -112,9 +116,3 @@ bucket_name = "static-pages"
 # [[vectorize]]
 # binding = "MY_INDEX"
 # index_name = "my-index"
-
-routes = [
-  { pattern = "crafty.social/*", zone_name = "crafty.social" }
-  # or
-  # { pattern = "subdomain.example.com/*", zone_id = "<YOUR_ZONE_ID>" }
-]
